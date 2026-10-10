@@ -40,7 +40,7 @@ These are the changes I made to the DAG:
   pushed it through XCom (which lives in Airflow's database). Now the tasks write CSVs and models to
   `working_data/` and only pass file paths and scores between tasks.
 - **Run settings.** `max_active_runs=1` so extra triggers wait in a queue instead of running on top
-  of each other (the problem I ran into above), `retries=2` with a 1 minute delay, a 10 minute
+  of each other, `retries=2` with a 1 minute delay, a 10 minute
   timeout per task, a 30 minute timeout per run, and an `on_failure_callback` that logs which task
   failed.
 - **Model registry.** The winning model is copied to `working_data/model_registry/best_model.joblib`
