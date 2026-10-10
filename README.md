@@ -16,9 +16,7 @@ quality_gate fails  -> reject_model ---------------------> pipeline_summary
 
 The original DAG was four tasks in a straight line: load the credit card CSV, preprocess it, fit
 KMeans for k = 1 to 49 inside a single task, then use the elbow method to pick k. It worked, but the
-whole model-fitting step lived in one task, so Airflow wasn't really orchestrating much. When I
-accidentally triggered it a few times, the overlapping runs took over 9 minutes to finish because
-they were all fighting for the CPU.
+whole model-fitting step lived in one task, so Airflow wasn't really orchestrating much. THE run took over 9 minutes to finish.
 
 These are the changes I made to the DAG:
 
