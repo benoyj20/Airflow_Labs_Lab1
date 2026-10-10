@@ -16,9 +16,7 @@ quality_gate fails  -> reject_model ---------------------> pipeline_summary
 
 The original DAG was four tasks in a straight line: load the credit card CSV, preprocess it, fit
 KMeans for k = 1 to 49 inside a single task, then use the elbow method to pick k. It worked, but the
-whole model-fitting step lived in one task, so Airflow wasn't really orchestrating much. When I
-accidentally triggered it a few times, the overlapping runs took over 9 minutes to finish because
-they were all fighting for the CPU.
+whole model-fitting step lived in one task, so Airflow wasn't really orchestrating much. THE run took over 9 minutes to finish.
 
 These are the changes I made to the DAG:
 
@@ -42,9 +40,9 @@ These are the changes I made to the DAG:
   pushed it through XCom (which lives in Airflow's database). Now the tasks write CSVs and models to
   `working_data/` and only pass file paths and scores between tasks.
 - **Run settings.** `schedule=None` so it only runs when triggered, `max_active_runs=1` so extra
-  triggers wait in a queue instead of running on top of each other (the problem I ran into above),
-  `retries=2` with a 1 minute delay, a 10 minute timeout per task, a 30 minute timeout per run, and
-  an `on_failure_callback` that logs which task failed.
+  triggers wait in a queue instead of running on top of each other, `retries=2` with a 1 minute
+  delay, a 10 minute timeout per task, a 30 minute timeout per run, and an `on_failure_callback`
+  that logs which task failed.
 - **Model registry.** The winning model is copied to `working_data/model_registry/best_model.joblib`
   along with a JSON file of its scores, and every run adds a line to `history.jsonl` saying whether
   the model was registered or rejected. This also fixes something odd in the original, which saved
