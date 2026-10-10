@@ -1,0 +1,38 @@
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Environment variables / secrets
+.env
+.env.*
+
+# Airflow
+logs/
+airflow.db
+airflow.cfg
+unittests.cfg
+webserver_config.py
+airflow-webserver.pid
+standalone_admin_password.txt
+plugins/__pycache__/
+
+# Model / data artifacts (recreated by every pipeline run)
+working_data/
+*.pkl
+*.joblib
+*.sav
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
