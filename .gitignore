@@ -19,6 +19,7 @@ __pycache__/
 logs/
 airflow.db
 airflow.cfg
+!config/airflow.cfg
 unittests.cfg
 webserver_config.py
 airflow-webserver.pid

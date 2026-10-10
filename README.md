@@ -57,6 +57,11 @@ Other changes:
   that name clashes with the `airflow` package.
 - Pinned `pandas==2.1.4` and `scikit-learn==1.9.1` in `docker-compose.yaml` and removed `kneed`,
   which isn't used anymore.
+- Added `config/airflow.cfg`, which `docker-compose.yaml` now loads through `AIRFLOW_CONFIG`. It
+  only overrides a few settings: the scheduler checks for DAG file changes every 30 seconds instead
+  of 5 minutes, the worker runs up to 8 tasks at once, the UI shows times in Eastern time, the top
+  bar shows "Airflow Lab 1 - Model Selection", and the config is visible under Admin > Configuration.
+- Added `setup.sh`, which does all of the setup steps below in one command.
 
 With these changes a full run takes about 25 seconds.
 
@@ -97,18 +102,34 @@ git clone https://github.com/benoyj20/Airflow_Labs_Lab1.git
 cd Airflow_Labs_Lab1
 ```
 
+**Quick option: run `setup.sh`**
+
+`setup.sh` does steps 2 to 5 for you: it creates the folders and the `.env` file, initializes
+Airflow, starts it, and waits until everything is healthy. On macOS or Linux run it from a terminal,
+and on Windows run it from Git Bash (installed with Git):
+
+```bash
+bash setup.sh
+```
+
+It's finished when it prints `Airflow is ready: http://localhost:8080 (login airflow2 / airflow2)`.
+Then skip to step 6. If you ever want to start over from scratch, `bash setup.sh --reset` deletes the
+database, logs and pipeline outputs first.
+
+If you'd rather do it by hand, follow steps 2 to 5.
+
 **2. Create the folders Airflow mounts**
 
 These aren't in the repo because they're empty or only hold generated files.
 
 On macOS, Linux or Git Bash:
 ```bash
-mkdir -p logs plugins config working_data
+mkdir -p logs plugins working_data
 ```
 
 On Windows PowerShell:
 ```powershell
-mkdir logs, plugins, config, working_data
+mkdir logs, plugins, working_data
 ```
 
 **3. Create the `.env` file**
@@ -166,7 +187,8 @@ redis               Up 2 minutes (healthy)
 
 **6. Log in**
 
-Go to http://localhost:8080 and log in with username `airflow2` and password `airflow2`.
+Go to http://localhost:8080 and log in with username `airflow2` and password `airflow2`. The top bar
+should say "Airflow Lab 1 - Model Selection", which means `config/airflow.cfg` was loaded.
 
 ## Running the pipeline
 
@@ -262,7 +284,11 @@ dags/
   src/
     __init__.py
     lab.py                 ML functions: load, validate, split, train, select, register, predict
+config/
+  airflow.cfg              Airflow settings for this lab
 docker-compose.yaml        the official Airflow 2.9.2 compose file, with the changes below
+setup.sh                   one-command setup
+.gitattributes             keeps setup.sh with Unix line endings so it runs on macOS/Linux
 .gitignore
 README.md
 ```
@@ -271,5 +297,6 @@ Changes I made to the official `docker-compose.yaml`:
 
 - `AIRFLOW__CORE__LOAD_EXAMPLES: 'false'` so the example DAGs don't show up
 - `_PIP_ADDITIONAL_REQUIREMENTS` set to `pandas==2.1.4 scikit-learn==1.9.1`
+- uncommented `AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'` so it loads `config/airflow.cfg`
 - added a `./working_data:/opt/airflow/working_data` volume for the pipeline output
 - changed the admin login to `airflow2` / `airflow2`
