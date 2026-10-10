@@ -41,10 +41,10 @@ These are the changes I made to the DAG:
 - **Passing file paths through XCom instead of data.** The original pickled the whole DataFrame and
   pushed it through XCom (which lives in Airflow's database). Now the tasks write CSVs and models to
   `working_data/` and only pass file paths and scores between tasks.
-- **Run settings.** `max_active_runs=1` so extra triggers wait in a queue instead of running on top
-  of each other (the problem I ran into above), `retries=2` with a 1 minute delay, a 10 minute
-  timeout per task, a 30 minute timeout per run, and an `on_failure_callback` that logs which task
-  failed.
+- **Run settings.** `schedule=None` so it only runs when triggered, `max_active_runs=1` so extra
+  triggers wait in a queue instead of running on top of each other (the problem I ran into above),
+  `retries=2` with a 1 minute delay, a 10 minute timeout per task, a 30 minute timeout per run, and
+  an `on_failure_callback` that logs which task failed.
 - **Model registry.** The winning model is copied to `working_data/model_registry/best_model.joblib`
   along with a JSON file of its scores, and every run adds a line to `history.jsonl` saying whether
   the model was registered or rejected. This also fixes something odd in the original, which saved
@@ -175,13 +175,14 @@ Go to http://localhost:8080 and log in with username `airflow2` and password `ai
 The DAG is called `Airflow_Lab1_model_selection`. Since the example DAGs are turned off, it should be
 the only one on the DAGs page.
 
-1. Turn on the toggle next to the DAG name. New DAGs start paused, and because this one has a daily
-   schedule, turning it on starts a run right away.
-2. Click the DAG name and open the Grid view to watch it. It should finish in about 25 seconds.
+1. Turn on the toggle next to the DAG name. New DAGs start paused, and a paused DAG won't run even
+   if you trigger it.
+2. Click the play button (Trigger DAG) on the right. The DAG has no schedule, so it only runs when
+   you trigger it. Because it has params, Airflow shows a form with `accuracy_threshold` and
+   `test_size`. Leave the defaults and click Trigger.
+3. Click the DAG name and open the Grid view to watch it. It should finish in about 25 seconds.
 
-To run it again, click the play button (Trigger DAG) in the top right. Because the DAG has params,
-Airflow shows a form with `accuracy_threshold` and `test_size`. Leave the defaults and click
-Trigger. If you trigger it several times, the extra runs show as queued and run one after another.
+If you trigger it several times, the extra runs show as queued and run one after another.
 
 **To see the reject branch:** trigger it again, but this time set `accuracy_threshold` to `0.999` in
 the form. No model gets that high, so `quality_gate` sends the run to `reject_model`, and

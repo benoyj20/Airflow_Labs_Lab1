@@ -45,7 +45,7 @@ default_args = {
 @dag(
     dag_id="Airflow_Lab1_model_selection",
     description="Parallel model training with a quality gate on the Breast Cancer dataset",
-    schedule="@daily",
+    schedule=None,
     start_date=datetime(2026, 1, 1),
     catchup=False,
     max_active_runs=1,
